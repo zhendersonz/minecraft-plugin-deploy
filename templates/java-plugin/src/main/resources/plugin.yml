@@ -1,0 +1,34 @@
+name: {{pluginName}}
+version: {{version}}
+main: com.{{groupId}}.{{mainClass}}
+api-version: '{{mcVersion}}'
+author: {{author}}
+description: {{description}}
+website: https://github.com/zhendersonz/{{pluginName}}
+
+commands:
+  {{commandName}}:
+    description: Comando principal do {{pluginName}}
+    usage: /<command> <subcomando>
+    aliases: []
+
+permissions:
+  {{permissionBase}}.use:
+    description: Permissao basica
+    default: true
+  {{permissionBase}}.admin:
+    description: Permissao admin
+    default: op
+    children:
+      {{permissionBase}}.use: true
+      {{permissionBase}}.reload: true
+  {{permissionBase}}.reload:
+    description: Recarregar config
+    default: op
+  {{permissionBase}}.*:
+    description: Todas as permissoes
+    default: op
+    children:
+      {{permissionBase}}.use: true
+      {{permissionBase}}.admin: true
+      {{permissionBase}}.reload: true

@@ -1,0 +1,14 @@
+# Configuracao do {{pluginName}}
+# Author: {{author}}
+
+# Mensagens
+messages:
+  prefix: "&8[&a{{pluginName}}&8] "
+  no-permission: "&cVoce nao tem permissao para isso."
+  reload: "&aConfiguracao recarregada!"
+
+# Opcoes
+options:
+  enabled: true
+  # exemplo: intervalo em segundos
+  interval: 30
