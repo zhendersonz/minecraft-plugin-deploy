@@ -38,6 +38,7 @@ Se o servidor crashar pós-deploy: rollback automático + aviso.
 ## O que faz
 
 - **Ler** — explora o código
+- **Listar** — lista TODOS os repositórios do GitHub do autor sem truncar
 - **Clonar** — baixa repo do GitHub
 - **Programar** — escreve, corrige, refatora
 - **Build** — compila com `mvn clean package`
@@ -139,6 +140,19 @@ com.<plugin>.utils    — Utilitários
 
 `references/paper-api.md` — padrões de implementação.
 
+### `/plugin-repos` — Listar repositórios do GitHub
+
+```
+Você: "/plugin-repos"
+  → busca TODAS as páginas da API do GitHub (paginação completa)
+  → exibe apenas: nome + descrição (formato compacto)
+  → sem truncamento
+  → "Repositórios de zhendersonz:"
+     1. CreativeLogger-1.0.1 — Plugin que rastreia itens do criativo
+     2. Duel1v1 — Plugin de duelos 1v1
+     ...
+```
+
 ## Config
 
 Salvo em `AGENTS.md` (pergunto 1x e guardo):
@@ -151,8 +165,9 @@ Salvo em `AGENTS.md` (pergunto 1x e guardo):
 
 | Comando | Ação | Deploy? |
 |---------|------|---------|
+| `/plugin-repos` | Lista TODOS os repositórios do GitHub (sem truncar) | Não |
 | `/plugin-fetch <repo>` | Clona/atualiza | Não |
-| `/plugin-list` | Lista plugins | Não |
+| `/plugin-list` | Lista plugins locais | Não |
 | `/plugin-build` | Compila | Não |
 | `/plugin-create <nome>` | Cria plugin novo | Não |
 | `/plugin-deploy` | Deploy com backup | **Sim** |
