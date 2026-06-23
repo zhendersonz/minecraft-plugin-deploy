@@ -82,7 +82,7 @@ A skill cobre o pipeline completo:
 3. **Clonar** — baixa repositório do GitHub
 4. **Programar** — escreve, corrige, refatora código
 5. **Build** — compila com `mvn clean package`
-6. **Git Sync** — fetch + pull antes de editar; commit + push após build (token perguntado na hora, nunca salvo)
+6. **Git Sync** — fetch + pull antes de editar; commit + push após build (mensagem em português, token perguntado na hora, nunca salvo)
 7. **Deploy** — só quando você mandar
 8. **Rollback** — só quando você mandar
 9. **Template** — cria plugin novo do zero com estrutura pronta
@@ -105,7 +105,7 @@ Você: "Adiciona comando /fly no HProtect"
   → edita
   → build
   → "Build passou. Quer commitar e dar push?"
-  → se sim: pergunta o token GitHub, commit + push
+  → se sim: pergunta o token GitHub, commit + push (mensagem SEMPRE em português)
   → "Quer fazer deploy?"
 ```
 
@@ -193,7 +193,7 @@ Progresso:
 - [ ] Código lido e entendido
 - [ ] Alterações feitas
 - [ ] Build passou (mvn clean package)
-- [ ] Git commit + push (opcional, token perguntado)
+- [ ] Git commit + push (mensagem em português, token perguntado na hora)
 - [ ] Deploy realizado (opcional, só com permissão)
 - [ ] Reload verificado
 ```
