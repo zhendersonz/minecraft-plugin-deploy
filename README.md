@@ -7,6 +7,7 @@ Skill para [OpenCode](https://opencode.ai) — automatiza o ciclo completo de de
 > 1. **Fork ou clone** este repositório para `~/.config/opencode/skills/minecraft-plugin-deploy/`
 > 2. **Edite `AGENTS.md`** com seus dados:
 >    - `GITHUB_USERNAME` — seu usuário do GitHub
+>    - `GIT_EMAIL` — seu email verificado no GitHub (para commits aparecerem verdes)
 >    - `PLUGINS_DIR` — pasta de plugins do seu servidor
 >    - `SERVER_DIR` — raiz do seu servidor (onde fica `spigot.yml` / `bukkit.yml`)
 > 3. Se não existir, a skill detecta automático na primeira execução
