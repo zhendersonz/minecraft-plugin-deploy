@@ -1,6 +1,7 @@
 # Config detectada automaticamente
 
 GITHUB_USERNAME: zhendersonz
+GIT_EMAIL: oihenderson12@gmail.com
 AUTHOR: zhendersonz
 PLUGINS_DIR: C:\Users\HENDI\Desktop\teste\plugins
 SERVER_DIR: C:\Users\HENDI\Desktop\teste

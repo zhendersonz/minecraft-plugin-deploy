@@ -17,6 +17,7 @@ metadata:
 
 Use `Read` em `AGENTS.md`. Se o arquivo existir, extraia:
 - `GITHUB_USERNAME` → use para TODAS as chamadas ao GitHub
+- `GIT_EMAIL` → use para configurar `git config user.email` antes de commitar
 - `PLUGINS_DIR` → use para deploy, listagem local
 - `SERVER_DIR` → use para reload
 - `JAVA_VERSION`, `MAVEN_HOME`, `PAPER_API_VERSION` → use para build
@@ -29,6 +30,7 @@ Rode detecção automática:
 
 | Variável | Fonte |
 |----------|-------|
+| `GIT_EMAIL` | `git config user.email` |
 | `GITHUB_USERNAME` | `git config user.name` |
 | `JAVA_VERSION` | `java -version` |
 | `MAVEN_HOME` | `mvn --version` |
@@ -105,7 +107,7 @@ Você: "Adiciona comando /fly no HProtect"
   → edita
   → build
   → "Build passou. Quer commitar e dar push?"
-  → se sim: pergunta o token GitHub, commit + push (mensagem SEMPRE em português)
+  → se sim: `git config user.email` com o email de `AGENTS.md`, pergunta o token GitHub, commit + push (mensagem SEMPRE em português)
   → "Quer fazer deploy?"
 ```
 
