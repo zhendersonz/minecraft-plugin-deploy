@@ -11,6 +11,33 @@ metadata:
   category: deployment
 ---
 
+## Procedimento obrigatório ao ser ativada
+
+### Passo 1: Leia `AGENTS.md` AGORA
+
+Use `Read` em `AGENTS.md`. Se o arquivo existir, extraia:
+- `GITHUB_USERNAME` → use para TODAS as chamadas ao GitHub
+- `PLUGINS_DIR` → use para deploy, listagem local
+- `SERVER_DIR` → use para reload
+- `JAVA_VERSION`, `MAVEN_HOME`, `PAPER_API_VERSION` → use para build
+
+**NÃO pergunte nada ao usuário. Use esses valores diretamente.**
+
+### Passo 2: Se `AGENTS.md` não existir
+
+Rode detecção automática:
+
+| Variável | Fonte |
+|----------|-------|
+| `GITHUB_USERNAME` | `git config user.name` |
+| `JAVA_VERSION` | `java -version` |
+| `MAVEN_HOME` | `mvn --version` |
+| `PLUGINS_DIR` | Procura `plugins/` junto com `spigot.yml`/`bukkit.yml` |
+| `SERVER_DIR` | Detectado por `spigot.yml`/`bukkit.yml` |
+| `PAPER_API_VERSION` | De `pom.xml` existente ou usa `1.21.4-R0.1-SNAPSHOT` |
+
+Se algo falhar na detecção, **só então** pergunte ao usuário (1 única vez) e salve em `AGENTS.md`.
+
 ## Regra de ouro
 
 - **Criar / Editar / Build** → faço na hora, sem perguntar
@@ -26,25 +53,6 @@ metadata:
 - "/plugin-repos" — listar repositórios do seu GitHub
 - "/plugin-list" — listar plugins locais
 - "/plugin-rollback X" — restaurar backup anterior
-
-## Auto-detecção
-
-**1. `AGENTS.md` existe?** → Carrega tudo de lá. **Nunca pergunta nada que já está salvo.** Usa direto.
-
-**2. `AGENTS.md` não existe?** → Roda detecção automática:
-
-| Variável | Fonte |
-|----------|-------|
-| `GITHUB_USERNAME` | `git config user.name` |
-| `JAVA_VERSION` | `java -version` |
-| `MAVEN_HOME` | `mvn --version` |
-| `PLUGINS_DIR` | Procura `plugins/` junto com `spigot.yml`/`bukkit.yml` |
-| `SERVER_DIR` | Detectado por `spigot.yml`/`bukkit.yml` |
-| `PAPER_API_VERSION` | De `pom.xml` existente ou usa `1.21.4-R0.1-SNAPSHOT` |
-
-Se algo falhar, pergunta **1 única vez** e salva em `AGENTS.md`.
-
-**Efeito**: `/plugin-repos`, `/plugin-fetch`, `/plugin-list`, `/plugin-deploy` usam o `AGENTS.md` sem perguntar nada.
 
 ## Proteção automática
 
