@@ -4,13 +4,16 @@ Skill para [OpenCode](https://opencode.ai) — automatiza o ciclo completo de de
 
 ## Funcionalidades
 
+- **Auto-detecção** — detecta Java, Maven, GitHub user, servidor e Paper API automaticamente
+- **Git Sync** — fetch + pull antes de editar; commit + push após build (token perguntado na hora, nunca salvo)
 - **Clonar** repositórios do GitHub
 - **Programar** — editar código, corrigir bugs, adicionar features
-- **Compilar** com `mvn clean package`
+- **Compilar** com `mvn clean package` (pom.xml profissional com shade + compilador)
 - **Deploy** com backup automático do JAR anterior
 - **Rollback** para versões anteriores
 - **Template** de novo plugin com estrutura pronta
-- **Reload** no servidor via PlugMan ou /reload
+- **Reload** no servidor
+- **GitHub templates** — PR, Issues, Contributing, CI workflows inclusos
 
 ## Como instalar
 
@@ -42,13 +45,16 @@ Ou copie manualmente para `~/.config/opencode/skills/minecraft-plugin-deploy/`.
 - Backup de arquivos `.java` antes de editar
 - Build obrigatório após modificações
 - Rollback automático se o servidor crashar pós-deploy
+- Git pull só acontece se não houver conflitos locais
+- Commit + push **só com sua autorização** (token pedido na hora, nunca salvo)
 
 ## Exemplos
 
 ```
-"Pega o LiveVoice do GitHub"
+"Pega o LiveVoice do GitHub"            → já sabe que é zhendersonz/LiveVoice
 "Cria um plugin de warp chamado WarpPlugin"
-"Adiciona comando /fly no HProtect, build e deploy"
+"Adiciona comando /fly no HProtect"      → fetch + pull antes, commit + push depois
+"Faz deploy do HProtect"                 → backup automático, só com sua permissão
 "Faz rollback do CreativeLogger"
 ```
 
@@ -56,12 +62,25 @@ Ou copie manualmente para `~/.config/opencode/skills/minecraft-plugin-deploy/`.
 
 ```
 minecraft-plugin-deploy/
+├── AGENTS.md                       # Config detectada automaticamente
 ├── SKILL.md                        # Instruções da skill
+├── scripts/
+│   └── detect-env.cmd              # Script de detecção de ambiente
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                  # CI build + test
+│   │   └── release-please.yml      # Release automatizada
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   └── feature_request.yml
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── CONTRIBUTING.md
 ├── references/
-│   └── paper-api.md                # Referência técnica Paper API
+│   ├── paper-api.md                # Referência técnica Paper API
+│   └── testing-guide.md            # Testes com MockBukkit
 └── templates/
     └── java-plugin/                # Template de novo plugin
-        ├── pom.xml
+        ├── pom.xml                 # Maven com shade + compilador configurado
         ├── config.yml
         └── src/main/
             ├── java/com/example/

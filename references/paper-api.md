@@ -1,15 +1,51 @@
 # Paper API — Padrões e Referência
 
+## Stack moderno (Paper 1.21+)
+
+| Componente | Recomendação |
+|------------|--------------|
+| **API** | `io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT` |
+| **Mensagens** | Adventure API + MiniMessage (preferencial) |
+| **Comandos** | `CommandExecutor` ou Cloud Command Framework |
+| **Logger** | SLF4J (`org.slf4j.Logger`) |
+| **Java** | 21+ |
+| **Testes** | JUnit 5 + MockBukkit |
+
+## Adventure API / MiniMessage (recomendado)
+
+```java
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.format.NamedTextColor;
+
+// MiniMessage (mais legível)
+var mm = MiniMessage.miniMessage();
+Component msg = mm.deserialize("<gradient:gold:yellow>Bem-vindo!</gradient>");
+player.sendMessage(msg);
+
+// Component builder
+Component texto = Component.text("Jogador: ", NamedTextColor.GRAY)
+    .append(Component.text(player.getName(), NamedTextColor.GREEN));
+player.sendMessage(texto);
+
+// Ações
+player.sendActionBar(Component.text("Ação rápida!", NamedTextColor.AQUA));
+player.sendMessage(Component.text("§cAinda funciona mas prefira Adventure"));
+```
+
 ## Estrutura da Main class
 
 ```java
 package com.meuplugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeuPlugin extends JavaPlugin {
 
     private static MeuPlugin instance;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MeuPlugin.class);
 
     @Override
     public void onEnable() {
@@ -17,12 +53,12 @@ public class MeuPlugin extends JavaPlugin {
         saveDefaultConfig();
         registerCommands();
         registerListeners();
-        getLogger().info("MeuPlugin ativado!");
+        LOGGER.info("MeuPlugin v{} ativado!", getDescription().getVersion());
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("MeuPlugin desativado!");
+        LOGGER.info("MeuPlugin desativado!");
     }
 
     public static MeuPlugin getInstance() {
@@ -30,56 +66,53 @@ public class MeuPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        // getCommand("meucomando").setExecutor(new MeuComando());
+        var cmd = getCommand("meucomando");
+        if (cmd != null) cmd.setExecutor(new MeuComando());
     }
 
     private void registerListeners() {
-        // getServer().getPluginManager().registerEvents(new MeuListener(), this);
+        getServer().getPluginManager().registerEvents(new MeuListener(), this);
     }
 }
 ```
 
-## Eventos comuns
+## Eventos
+
+### Listeners
 
 ```java
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-```
-
-### Listener padrão
-
-```java
-package com.meuplugin;
+package com.meuplugin.listeners;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeuListener implements Listener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MeuListener.class);
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         event.getPlayer().sendMessage("§aBem-vindo!");
+        LOGGER.debug("Player {} entrou no servidor", event.getPlayer().getName());
     }
 }
 ```
 
-## Comandos
-
-### Classe separada (recomendado)
+### Eventos comuns
 
 ```java
-package com.meuplugin;
+PlayerJoinEvent, PlayerQuitEvent, PlayerInteractEvent, PlayerMoveEvent,
+BlockPlaceEvent, BlockBreakEvent, EntityDeathEvent, PlayerDeathEvent,
+InventoryClickEvent, InventoryOpenEvent
+```
+
+## Comandos
+
+```java
+package com.meuplugin.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -90,28 +123,29 @@ public class MeuComando implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("§cApenas jogadores podem usar este comando.");
+        if (!(sender instanceof Player p)) {
+            sender.sendMessage("§cApenas jogadores.");
             return true;
         }
-
-        Player p = (Player) sender;
-
         if (args.length == 0) {
-            p.sendMessage("§eUse: /meucomando <arg>");
+            p.sendMessage("§eUse /meucomando help");
             return true;
         }
-
-        p.sendMessage("§aVocê digitou: " + args[0]);
+        switch (args[0].toLowerCase()) {
+            case "help" -> p.sendMessage("§eComandos disponiveis...");
+            default -> p.sendMessage("§cComando desconhecido.");
+        }
         return true;
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MeuComando.class);
 }
 ```
 
 ### TabCompleter
 
 ```java
-package com.meuplugin;
+package com.meuplugin.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -122,53 +156,56 @@ public class MeuTabCompleter implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (args.length == 1) {
-            return List.of("opcao1", "opcao2", "opcao3");
-        }
+        if (args.length == 1) return List.of("help", "reload");
         return List.of();
     }
 }
 ```
 
-### Registrar ambos no onEnable
+### Registrar no onEnable
 
 ```java
-getCommand("meucomando").setExecutor(new MeuComando());
-getCommand("meucomando").setTabCompleter(new MeuTabCompleter());
+var cmd = getCommand("meucomando");
+if (cmd != null) {
+    cmd.setExecutor(new MeuComando());
+    cmd.setTabCompleter(new MeuTabCompleter());
+}
 ```
 
 ## Config.yml
 
 ```java
-// salvar padrão
+// Salvar padrão
 saveDefaultConfig();
 
-// ler
+// Ler
 String valor = getConfig().getString("caminho.chave", "valorPadrao");
 int numero = getConfig().getInt("caminho.numero", 10);
 boolean bool = getConfig().getBoolean("caminho.flag", false);
 
-// escrever
+// Escrever
 getConfig().set("caminho.chave", "novoValor");
 saveConfig();
 
-// recarregar
+// Recarregar
 reloadConfig();
 ```
 
-## Mensagens coloridas
+## Logger (SLF4J - recomendado sobre getLogger())
 
 ```java
-// § = & no config.yml
-p.sendMessage("§cVermelho §aVerde §eAmarelo");
-p.sendMessage(ChatColor.RED + "Vermelho" + ChatColor.GREEN + " Verde");
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-// Component (moderno)
-p.sendActionBar("§aMensagem na barra de ação");
-p.sendTitle("§cTítulo", "§7Subtítulo", 10, 70, 20);
+private static final Logger LOGGER = LoggerFactory.getLogger(MinhaClasse.class);
+
+// Com placeholders (evita concatenação)
+LOGGER.info("Player {} executou comando {}", player.getName(), label);
+LOGGER.warn("Configuração ausente: {}", path);
+LOGGER.error("Erro ao processar {}", data, exception); // stack trace incluso
 ```
 
-## Ponteiros uteis do Paper
+## Ponteiros úteis
 
 ```java
 // Verificar se é jogador
@@ -183,7 +220,6 @@ float yaw = loc.getYaw(), pitch = loc.getPitch();
 // Itens
 ItemStack item = p.getInventory().getItemInMainHand();
 Material type = item.getType();
-if (type == Material.DIAMOND) { }
 
 // Som
 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
@@ -191,20 +227,18 @@ p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 // Partículas
 p.spawnParticle(Particle.FLAME, loc, 10, 0.5, 0.5, 0.5, 0.01);
 
-// Schedule task (1 tick = 1/20 seg)
+// Task (1 tick = 1/20 seg)
 new BukkitRunnable() {
     @Override
     public void run() {
         p.sendMessage("§aPassou 1 segundo!");
     }
-}.runTaskLater(plugin, 20L); // 20 ticks = 1 segundo
+}.runTaskLater(plugin, 20L);
 
 // Task repetitiva
 new BukkitRunnable() {
     @Override
-    public void run() {
-        // executa a cada X ticks
-    }
+    public void run() { }
 }.runTaskTimer(plugin, 0L, 20L);
 ```
 
@@ -251,16 +285,7 @@ public class Database {
 }
 ```
 
-### MySQL
-
-```java
-conn = DriverManager.getConnection(
-    "jdbc:mysql://localhost:3306/minecraft?useSSL=false",
-    "user", "password"
-);
-```
-
-## PersistentDataContainer (Paper moderno)
+## PersistentDataContainer
 
 ```java
 // Salvar dados no item (sem lore)
@@ -275,3 +300,14 @@ String dono = item.getItemMeta()
     .getPersistentDataContainer()
     .get(key, PersistentDataType.STRING);
 ```
+
+## Boas práticas
+
+- Prefira Adventure API sobre `§`/`ChatColor`
+- Use SLF4J em vez de `getLogger()`/`System.out`/`e.printStackTrace()`
+- Valide configuração no `onEnable()`, desabilite o plugin se inválido
+- Use try-with-resources para conexões e streams
+- Nunca chame Bukkit API de threads assíncronas
+- UUIDs em vez de referências `Player` em coleções
+- Prepared statements — nunca concatenação de SQL
+- Adicione `api-version` no plugin.yml

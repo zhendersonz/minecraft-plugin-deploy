@@ -1,0 +1,31 @@
+name: Bug Report
+description: Reporte um bug do plugin
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: input
+    attributes:
+      label: Versão do servidor
+      description: Saída do comando /version
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Versão do plugin
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Descrição
+      description: O que aconteceu? O que deveria acontecer?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Passos para reproduzir
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Logs
+      description: Cole o latest.log ou stack trace

@@ -1,54 +1,81 @@
 ---
 name: minecraft-plugin-deploy
-description: Ciclo completo de plugins Paper/Spigot — clonar, programar, compilar com Maven, deploy com backup, rollback, reload, e criar novos plugins
+description: Automatiza o ciclo completo de desenvolvimento de plugins Paper/Spigot — clonar, programar, compilar com Maven, deploy com backup, rollback, reload e criar novos plugins do zero. Ative quando o usuário mencionar plugins Minecraft, Paper, Spigot, Maven, ou comandos /plugin-*
 license: MIT
 metadata:
   stack: java
   tooling: maven
   game: minecraft
   api: paper
+  audience: developers
+  category: deployment
 ---
 
 ## Regra de ouro
 
 - **Criar / Editar / Build** → faço na hora, sem perguntar
 - **Deploy / Reload / Rollback** → só quando você pedir explicitamente
+- **Token GitHub** → nunca salvo, perguntado na hora do push
 
-Segurança automática roda silenciosa nos bastidores.
+## Quando usar esta skill
 
-## Proteção automática (silenciosa)
+- "Cria um plugin de X" — gerar novo plugin do template
+- "Adiciona comando /X no Y" — editar plugin existente
+- "Faz deploy do X" — copiar JAR e recarregar servidor
+- "Pega o X do GitHub" — clonar repositório
+- "/plugin-repos" — listar repositórios do seu GitHub
+- "/plugin-list" — listar plugins locais
+- "/plugin-rollback X" — restaurar backup anterior
 
-- ✅ Backup de JAR antes de deploy
-- ✅ Backup de .java antes de editar (`<arquivo>.original.bak`)
-- ✅ Verificar servidor online antes de reload
-- ✅ Build automático após editar código
-- ✅ Backup do JAR atual antes de rollback
+## Auto-detecção
+
+Na primeira execução, detecto automaticamente e salvo em `AGENTS.md`:
+
+- `GITHUB_USERNAME` — do `git config user.name`
+- `JAVA_VERSION` — do `java -version`
+- `MAVEN_HOME` — do `mvn --version`
+- `PLUGINS_DIR` — procurando pasta `plugins/` junto com `spigot.yml`/`bukkit.yml`
+- `SERVER_DIR` — detectado pela presença de `spigot.yml`/`bukkit.yml`
+- `PAPER_API_VERSION` — de um `pom.xml` existente ou usa `1.21.4-R0.1-SNAPSHOT`
+
+Se algo não for detectado, pergunta **1 única vez** e guarda.
+
+## Proteção automática
+
+- Backup de JAR antes de deploy
+- Backup de .java antes de editar (`<arquivo>.original.bak`)
+- Verificar servidor online antes de reload
+- Build automático após editar código
+- Backup do JAR atual antes de rollback
+- Git pull só se não houver conflitos locais
 
 Se o build falhar: tento corrigir (máx 3x). Se não conseguir, aviso.
 
-Se o servidor crashar pós-deploy: rollback automático + aviso.
-
 ## NUNCA faço
 
-- ❌ Deploy sem você pedir "faz deploy" ou "/plugin-deploy"
-- ❌ Mexer em paper.jar, server.properties
-- ❌ Force push
-- ❌ Deletar arquivos sem backup
+- Deploy sem você pedir "faz deploy" ou "/plugin-deploy"
+- Mexer em paper.jar, server.properties
+- Force push
+- Deletar arquivos sem backup
+- Salvar token GitHub em arquivo
 
-## O que faz
+## Overview
 
-- **Ler** — explora o código
-- **Listar** — lista TODOS os repositórios do GitHub do autor sem truncar
-- **Clonar** — baixa repo do GitHub
-- **Programar** — escreve, corrige, refatora
-- **Build** — compila com `mvn clean package`
-- **Deploy** — só quando você mandar
-- **Rollback** — só quando você mandar
-- **Template** — cria plugin novo do zero
+A skill cobre o pipeline completo:
 
-## Fluxo
+1. **Ler** — explora código de plugins existentes
+2. **Listar** — lista TODOS os repositórios do seu GitHub (paginação completa)
+3. **Clonar** — baixa repositório do GitHub
+4. **Programar** — escreve, corrige, refatora código
+5. **Build** — compila com `mvn clean package`
+6. **Git Sync** — fetch + pull antes de editar; commit + push após build (token perguntado na hora, nunca salvo)
+7. **Deploy** — só quando você mandar
+8. **Rollback** — só quando você mandar
+9. **Template** — cria plugin novo do zero com estrutura pronta
 
-### Editar/Criar (automático — sem perguntar)
+## Fluxo de trabalho
+
+### Editar / Criar
 
 ```
 Você: "Cria um plugin de warp chamado WarpPlugin"
@@ -58,49 +85,51 @@ Você: "Cria um plugin de warp chamado WarpPlugin"
   → "Plugin criado! Build ok. Quer fazer deploy?"
 
 Você: "Adiciona comando /fly no HProtect"
+  → git fetch origin (se repo Git)
+  → git pull --rebase (se main/master e sem conflitos)
   → lê o código
   → edita
   → build
-  → "Comando adicionado! Build passou. Quer deploy?"
+  → "Build passou. Quer commitar e dar push?"
+  → se sim: pergunta o token GitHub, commit + push
+  → "Quer fazer deploy?"
 ```
 
-### Deploy (só quando pedir)
+### Deploy
 
 ```
 Você: "Faz deploy do HProtect"
-  → backup automático do JAR antigo
+  → backup do JAR antigo
   → copia novo JAR
   → verifica servidor online
   → reload
   → "Deploy feito! Plugin rodando."
-
-Você: "/plugin-deploy"
-  → mesma coisa
 ```
 
-### Rollback (só quando pedir)
+### Rollback
 
 ```
 Você: "Faz rollback do CreativeLogger"
   → lista backups com data e tamanho
   → pergunta qual restaurar
-  → você escolhe
   → restaura + reload
 ```
 
 ## Regras de código
 
-### Estrutura
+### Estrutura de pacotes
+
 ```
-com.<plugin>          — Main class
-com.<plugin>.commands — CommandExecutors
-com.<plugin>.listeners — Listeners
-com.<plugin>.managers — Lógica
-com.<plugin>.models   — Dados
-com.<plugin>.utils    — Utilitários
+com.<plugin>             — Main class
+com.<plugin>.commands    — CommandExecutors
+com.<plugin>.listeners   — Listeners
+com.<plugin>.managers    — Lógica
+com.<plugin>.models      — Dados
+com.<plugin>.utils       — Utilitários
 ```
 
 ### Convenções
+
 - `onEnable` só registra comandos/listeners/config
 - Classes separadas pra cada comando/listener
 - `instance = this` (singleton)
@@ -110,20 +139,20 @@ com.<plugin>.utils    — Utilitários
 - try-with-resources
 - NUNCA `@EventHandler` na Main
 - Valide permissão em comandos admin
+- Prefira Adventure API / MiniMessage para mensagens
 
 ### Evitar
+
 - `Bukkit.getScheduler().scheduleSyncDelayedTask`
 - `ItemStack()` sem Material
-- `ChatColor.RED` — use `"§c"`
+- `ChatColor.RED` — use Adventure: `Component.text("texto", NamedTextColor.RED)`
 - `getConfig().save(new File(...))` — use `saveConfig()`
 - Loops infinitos, null não verificado
+- `e.printStackTrace()` — use `getLogger()` ou SLF4J
 
-## Template
+## Template de novo plugin
 
-`/plugin-create <nome> <desc>`:
-- Pergunta parâmetros (1x)
-- Cria e build na hora
-- Não faz deploy
+`/plugin-create <nome> <desc>`: pergunta parâmetros 1x, cria e build na hora. Não faz deploy.
 
 ```
 <nome>/
@@ -136,36 +165,30 @@ com.<plugin>.utils    — Utilitários
 └── src/main/resources/plugin.yml
 ```
 
-## Referência
+## Referências
 
-`references/paper-api.md` — padrões de implementação.
+- `references/paper-api.md` — padrões de implementação Paper API
+- `references/testing-guide.md` — testes com MockBukkit
+- `templates/java-plugin/` — template de plugin
 
-### `/plugin-repos` — Listar repositórios do GitHub
+## Checklist de implementação
 
 ```
-Você: "/plugin-repos"
-  → busca TODAS as páginas da API do GitHub (paginação completa)
-  → exibe apenas: nome + descrição (formato compacto)
-  → sem truncamento
-  → "Repositórios de zhendersonz:"
-     1. CreativeLogger-1.0.1 — Plugin que rastreia itens do criativo
-     2. Duel1v1 — Plugin de duelos 1v1
-     ...
+Progresso:
+- [ ] Auto-detecção concluída (AGENTS.md)
+- [ ] Código lido e entendido
+- [ ] Alterações feitas
+- [ ] Build passou (mvn clean package)
+- [ ] Git commit + push (opcional, token perguntado)
+- [ ] Deploy realizado (opcional, só com permissão)
+- [ ] Reload verificado
 ```
-
-## Config
-
-Salvo em `AGENTS.md` (pergunto 1x e guardo):
-- `PLUGINS_DIR`
-- `PAPER_API_VERSION`
-- `JAVA_VERSION`
-- `AUTHOR` — ZHendersonZ
 
 ## Comandos
 
 | Comando | Ação | Deploy? |
 |---------|------|---------|
-| `/plugin-repos` | Lista TODOS os repositórios do GitHub (sem truncar) | Não |
+| `/plugin-repos` | Lista TODOS os repositórios do GitHub | Não |
 | `/plugin-fetch <repo>` | Clona/atualiza | Não |
 | `/plugin-list` | Lista plugins locais | Não |
 | `/plugin-build` | Compila | Não |
