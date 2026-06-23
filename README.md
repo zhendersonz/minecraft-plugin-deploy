@@ -2,6 +2,17 @@
 
 Skill para [OpenCode](https://opencode.ai) — automatiza o ciclo completo de desenvolvimento de plugins **Minecraft Paper/Spigot** em Java com Maven.
 
+> ### ⚙️ Para usar no seu servidor
+>
+> 1. **Fork ou clone** este repositório para `~/.config/opencode/skills/minecraft-plugin-deploy/`
+> 2. **Edite `AGENTS.md`** com seus dados:
+>    - `GITHUB_USERNAME` — seu usuário do GitHub
+>    - `PLUGINS_DIR` — pasta de plugins do seu servidor
+>    - `SERVER_DIR` — raiz do seu servidor (onde fica `spigot.yml` / `bukkit.yml`)
+> 3. Se não existir, a skill detecta automático na primeira execução
+>
+> Para testar rapidamente, crie a pasta `C:\Users\HENDI\Desktop\teste\plugins` ou ajuste os caminhos no `AGENTS.md`.
+
 ## Funcionalidades
 
 - **Auto-detecção** — detecta Java, Maven, GitHub user, servidor e Paper API automaticamente
