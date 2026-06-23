@@ -29,16 +29,22 @@ metadata:
 
 ## Auto-detecção
 
-Na primeira execução, detecto automaticamente e salvo em `AGENTS.md`:
+**1. `AGENTS.md` existe?** → Carrega tudo de lá. **Nunca pergunta nada que já está salvo.** Usa direto.
 
-- `GITHUB_USERNAME` — do `git config user.name`
-- `JAVA_VERSION` — do `java -version`
-- `MAVEN_HOME` — do `mvn --version`
-- `PLUGINS_DIR` — procurando pasta `plugins/` junto com `spigot.yml`/`bukkit.yml`
-- `SERVER_DIR` — detectado pela presença de `spigot.yml`/`bukkit.yml`
-- `PAPER_API_VERSION` — de um `pom.xml` existente ou usa `1.21.4-R0.1-SNAPSHOT`
+**2. `AGENTS.md` não existe?** → Roda detecção automática:
 
-Se algo não for detectado, pergunta **1 única vez** e guarda.
+| Variável | Fonte |
+|----------|-------|
+| `GITHUB_USERNAME` | `git config user.name` |
+| `JAVA_VERSION` | `java -version` |
+| `MAVEN_HOME` | `mvn --version` |
+| `PLUGINS_DIR` | Procura `plugins/` junto com `spigot.yml`/`bukkit.yml` |
+| `SERVER_DIR` | Detectado por `spigot.yml`/`bukkit.yml` |
+| `PAPER_API_VERSION` | De `pom.xml` existente ou usa `1.21.4-R0.1-SNAPSHOT` |
+
+Se algo falhar, pergunta **1 única vez** e salva em `AGENTS.md`.
+
+**Efeito**: `/plugin-repos`, `/plugin-fetch`, `/plugin-list`, `/plugin-deploy` usam o `AGENTS.md` sem perguntar nada.
 
 ## Proteção automática
 
