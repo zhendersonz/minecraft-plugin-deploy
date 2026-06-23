@@ -2,8 +2,8 @@
 
 GITHUB_USERNAME: zhendersonz
 AUTHOR: zhendersonz
-PLUGINS_DIR: C:\Users\HENDI\Desktop\lobby\plugins
-SERVER_DIR: C:\Users\HENDI\Desktop\lobby
+PLUGINS_DIR: C:\Users\HENDI\Desktop\teste\plugins
+SERVER_DIR: C:\Users\HENDI\Desktop\teste
 JAVA_VERSION: 26
 PAPER_API_VERSION: 1.21.4-R0.1-SNAPSHOT
 MAVEN_HOME: C:\tools\apache-maven-3.9.16
